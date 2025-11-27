@@ -1,5 +1,5 @@
 def login_cp(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:  # Remove the parentheses
         action = "/logout/"
         label = "Logout"
     else:

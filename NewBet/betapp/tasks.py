@@ -1,15 +1,16 @@
-from celery import task
+# betapp/tasks.py - Updated to use sports_api
+from celery import shared_task
 from celery.schedules import crontab
-from celery.task import periodic_task
 
 from django.core.mail import send_mail
 from django.utils import timezone
 
 from .models import *
 from .update_db import update_fixtures, create_team_standing
+from .api_connection import sports_api  # Changed from football_apis to sports_api
 
 
-@task
+@shared_task
 def bet_created(bet_id):
     """
     Sends email with confirmation of creating new bet
@@ -48,10 +49,7 @@ def update_fixtures_foo():
         create_team_standing(competition_id=competition.id)
 
 
-@periodic_task(run_every=(crontab(minute="*/3", hour="*", day_of_month="*",
-                                  month_of_year="*")))
+@shared_task
 def check_fixtures():
     change_status()
     update_fixtures_foo()
-
-

@@ -1,5 +1,6 @@
+# betapp/admin.py
 from django.contrib import admin
-from .models import *
+from betapp.models import Competition, Team, Fixture, AppUser, Bet, Bookmaker
 
 
 class FixtureAdmin(admin.ModelAdmin):
@@ -12,10 +13,11 @@ class BetAdmin(admin.ModelAdmin):
     list_display = ['id', 'bet_user', 'bet_amount', 'fixture', 'bet',
                     'bet_course', 'bet_result']
 
-    #search_fields = ['fixture', 'bet_user__user__username']
 
+# Register your models
 admin.site.register(Competition)
 admin.site.register(Team)
 admin.site.register(Fixture, FixtureAdmin)
 admin.site.register(AppUser)
 admin.site.register(Bet, BetAdmin)
+admin.site.register(Bookmaker)

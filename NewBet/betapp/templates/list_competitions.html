@@ -1,13 +1,18 @@
+<!-- betapp/templates/list_competitions.html -->
 {% extends 'base.html' %}
-{% block content %}
-<h1>Available competitions</h1>
-<form method="POST" action="">
-    {% csrf_token %}
-    {% for comp in competitions %}
-        <input type="checkbox" name="competition" value="{{ comp.id }}">
-        {{ comp.caption }}<br>
-    {% endfor %}
-    <input type="submit" value="Add">
-</form>
 
+{% block content %}
+<h2>Add Competitions to Follow</h2>
+<form action="" method="POST">
+    {% csrf_token %}
+    <ul>
+        {% for competition in competitions %}
+            <li>
+                <input type="checkbox" name="competition" value="{{ competition.idLeague }}">
+                {{ competition.strLeague }} ({{ competition.strCountry }})
+            </li>
+        {% endfor %}
+    </ul>
+    <input type="submit" value="Add Selected Competitions">
+</form>
 {% endblock %}

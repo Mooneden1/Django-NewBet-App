@@ -4,7 +4,7 @@ from django.views.generic.edit import FormView
 from django.contrib.auth.mixins import PermissionRequiredMixin, \
     LoginRequiredMixin
 from django.shortcuts import redirect
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic.list import ListView
 from django.conf import settings
 
@@ -145,7 +145,7 @@ class RegisterView(FormView):
     def test_func(self):
         return not self.request.user.is_authenticated
 
-    template_name = "register_form.html"
+    template_name = "register/register_form.html"
     form_class = RegisterForm
     success_url = reverse_lazy('competitions')
 
@@ -249,31 +249,45 @@ class ShowTeamView(View):
         return render(request, "show_team.html", context)
 
 
+# In betapp/views.py, update the AddCompetitionsView
 class AddCompetitionsView(PermissionRequiredMixin, View):
     permission_required = ['is_superuser']
 
     def get(self, request, season):
         """
-        Displays all available teams for season and anables to select them 
-        to be added to db. 
-        Competitions can be added only by superuser!!!
-        :param season: int - season start year
-        :return: renders html with checkboxes for competition selection
+        Displays all available leagues from The Sports DB
         """
-        competitions = get_competitions(season=season)
-
-        context = {"competitions": competitions}
+        from .api_connection import sports_api
+        
+        competitions_data = sports_api.get_all_leagues()
+        
+        football_leagues = []
+        if competitions_data and 'leagues' in competitions_data:
+            football_leagues = [
+                league for league in competitions_data['leagues'] 
+                if league['strSport'] == 'Soccer'
+            ]
+        
+        context = {"competitions": football_leagues}
         return render(request, 'list_competitions.html', context)
 
     def post(self, request, season):
         """
         Adds selected competitions to db
-        :param season: int - season start year
-        :return: redirection to competitions view
         """
-        selected_copmetitions = request.POST.getlist('competition')
-        for competition_id in selected_copmetitions:
-            create_competition(int(competition_id))
+        from .update_db import create_competition
+        
+        selected_competitions = request.POST.getlist('competition')
+        for competition_id in selected_competitions:
+            # Get league name from the form data
+            # We need to find the league name from the ID
+            competitions_data = sports_api.get_all_leagues()
+            if competitions_data and 'leagues' in competitions_data:
+                for league in competitions_data['leagues']:
+                    if str(league['idLeague']) == competition_id:
+                        create_competition(league['idLeague'], league['strLeague'])
+                        break
+        
         return redirect(reverse_lazy('competitions'))
 
 

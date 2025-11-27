@@ -8,3 +8,11 @@ app = Celery('NewBet')
 
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+#section for periodic tasks
+app.conf.beat_schedule = {
+    'check-fixtures-every-3-minutes': {
+        'task': 'betapp.tasks.check_fixtures',
+        'schedule': crontab(minute='*/3'),  # Every 3 minutes
+    },
+}
